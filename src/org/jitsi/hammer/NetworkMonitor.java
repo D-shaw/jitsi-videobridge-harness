@@ -13,6 +13,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
@@ -24,12 +26,14 @@ import org.jitsi.hammer.Credential;
 import org.jitsi.hammer.Hammer;
 import org.jitsi.hammer.HostInfo;
 import org.jitsi.hammer.utils.MediaDeviceChooser;
+import org.jitsi.impl.neomedia.jmfext.media.protocol.greyfading.VideoGreyFadingMediaDevice;
 import org.jitsi.impl.neomedia.jmfext.media.protocol.rtpdumpfile.RtpdumpMediaDevice;
 import org.jitsi.service.libjitsi.LibJitsi;
 import org.jitsi.service.neomedia.MediaService;
 import org.jitsi.service.neomedia.codec.Constants;
 import org.jitsi.service.neomedia.device.MediaDevice;
 import org.jitsi.service.neomedia.format.MediaFormatFactory;
+import org.jitsi.videobridge.AudioSilenceMediaDevice;
 
 import net.java.sip.communicator.launcher.ChangeJVMFrame;
 
@@ -43,17 +47,30 @@ import java.awt.Toolkit;
 import javax.swing.JSpinner;
 import javax.swing.JRadioButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.awt.event.ItemEvent;
 import java.awt.Font;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
+import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
-public class NetworkMonitor implements ItemListener, ActionListener {
+public class NetworkMonitor implements ItemListener, ActionListener, FocusListener {
+
+	public static StringBuffer guiLog = new StringBuffer("");
 
 	private JFrame frmTestHarness;
 	private JTextField txtXMPPdomain;
@@ -62,15 +79,16 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 	private JTextField txtRoomName;
 	private JTextField txtPort;
 	private JTextField txtLength;
+	private JTextArea txtrAudioFile;
+	private JTextArea txtrVideoFile;
 
-	private JTextArea txtrReserved;
-
-	private JRadioButton rdbtnTcpip;
+	private JRadioButton rdbtnTcpIp;
 	private JRadioButton rdbtnUdp;
 
 	private JButton btnApply;
 	private JButton btnReset;
 	private JButton btnAssist;
+	private JButton btnServerMonitor;
 	private JButton AudioFileButton;
 	private JButton VideoFileButton;
 	private JButton btnLoginCredentials;
@@ -79,14 +97,14 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 	private JSpinner spnStatsPolling;
 	private JSpinner spnAddInterval;
 
-	private JComboBox<String> comboBox;
-
 	private JCheckBox chckbxAudioStream;
 	private JCheckBox chckbxVideoStream;
 	private JCheckBox chckbxOverallStats;
 	private JCheckBox chckbxAllStats;
 	private JCheckBox chckbxSummaryStats;
 	private JCheckBox chckbxNoStats;
+	private JScrollPane scrollPane;
+	private JTextArea txtrReserved;
 
 	/**
 	 * Launch the application.
@@ -126,6 +144,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 
 			return;
 		}
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -152,13 +171,14 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		frmTestHarness = new JFrame();
 		frmTestHarness.setResizable(false);
 		frmTestHarness.setTitle("Test Harness");
-		frmTestHarness.setBounds(100, 100, 656, 500);
+		frmTestHarness.setBounds(100, 100, 700, 550);
 		frmTestHarness.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JMenuBar menuBar = new JMenuBar();
 		frmTestHarness.setJMenuBar(menuBar);
 
 		JMenu mnFile = new JMenu("File");
+		mnFile.setMnemonic(KeyEvent.VK_F);
 		menuBar.add(mnFile);
 
 		JMenuItem mntmNewMenuItem = new JMenuItem("Exit");
@@ -170,6 +190,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		mnFile.add(mntmNewMenuItem);
 
 		JMenu mnHelp = new JMenu("Help");
+		mnFile.setMnemonic(KeyEvent.VK_H);
 		menuBar.add(mnHelp);
 
 		JMenuItem mntmAbout = new JMenuItem("About");
@@ -185,7 +206,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		JPanel panel = new JPanel();
 		frmTestHarness.getContentPane().add(panel, BorderLayout.WEST);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 130, 0 };
+		gbl_panel.columnWidths = new int[] { 170, 0 };
 		gbl_panel.rowHeights = new int[] { 50, 16, 26, 16, 26, 16, 26, 0, 0, 0, 20 };
 		gbl_panel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
@@ -200,6 +221,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 
 		txtXMPPdomain = new JTextField();
+		txtXMPPdomain.setText("52.88.34.121");
 		GridBagConstraints gbc_txtXMPPdomain = new GridBagConstraints();
 		gbc_txtXMPPdomain.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtXMPPdomain.insets = new Insets(0, 0, 5, 0);
@@ -217,6 +239,8 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 
 		txtXMPPhost = new JTextField();
+		txtXMPPhost.setText("52.88.34.121");
+		txtXMPPhost.addFocusListener(this);
 		GridBagConstraints gbc_txtXMPPhost = new GridBagConstraints();
 		gbc_txtXMPPhost.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtXMPPhost.insets = new Insets(0, 0, 5, 0);
@@ -234,6 +258,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 
 		txtMUCdomain = new JTextField();
+		txtMUCdomain.setText("conference.52.88.34.121");
 		GridBagConstraints gbc_txtMUCdomain = new GridBagConstraints();
 		gbc_txtMUCdomain.insets = new Insets(0, 0, 5, 0);
 		gbc_txtMUCdomain.fill = GridBagConstraints.HORIZONTAL;
@@ -275,7 +300,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		gbl_GenPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gbl_GenPanel.rowHeights = new int[] { 35, 0, 0, 35, 0, 0, 35, 0, 0, 0, 0 };
 		gbl_GenPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE };
-		gbl_GenPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_GenPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
 		GenPanel.setLayout(gbl_GenPanel);
 
 		JLabel lblRoomName = new JLabel("Room Name");
@@ -293,7 +318,7 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		GenPanel.add(lblPort, gbc_lblPort);
 
 		txtRoomName = new JTextField();
-		txtRoomName.setText("TestHammer");
+		txtRoomName.setText("TestHarness");
 		GridBagConstraints gbc_txtRoomName = new GridBagConstraints();
 		gbc_txtRoomName.insets = new Insets(0, 0, 5, 5);
 		gbc_txtRoomName.gridx = 1;
@@ -349,34 +374,46 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		gbc_lblNetworkProtocol.gridy = 7;
 		GenPanel.add(lblNetworkProtocol, gbc_lblNetworkProtocol);
 
-		rdbtnTcpip = new JRadioButton("TCP/IP");
-		rdbtnTcpip.setSelected(true);
+		rdbtnTcpIp = new JRadioButton("TCP/IP");
+		rdbtnTcpIp.setSelected(true);
+		rdbtnTcpIp.addItemListener(this);
 		GridBagConstraints gbc_rdbtnTcpip = new GridBagConstraints();
 		gbc_rdbtnTcpip.insets = new Insets(0, 0, 5, 5);
 		gbc_rdbtnTcpip.gridx = 1;
 		gbc_rdbtnTcpip.gridy = 8;
-		GenPanel.add(rdbtnTcpip, gbc_rdbtnTcpip);
+		GenPanel.add(rdbtnTcpIp, gbc_rdbtnTcpip);
 
 		rdbtnUdp = new JRadioButton("UDP");
 		GridBagConstraints gbc_rdbtnUdp = new GridBagConstraints();
-		gbc_rdbtnUdp.insets = new Insets(0, 0, 5, 0);
-		gbc_rdbtnUdp.gridx = 3;
-		gbc_rdbtnUdp.gridy = 8;
+		gbc_rdbtnUdp.ipadx = 17;
+		gbc_rdbtnUdp.insets = new Insets(0, 0, 5, 5);
+		gbc_rdbtnUdp.gridx = 1;
+		gbc_rdbtnUdp.gridy = 9;
 		GenPanel.add(rdbtnUdp, gbc_rdbtnUdp);
 
 		ButtonGroup group = new ButtonGroup();
-		group.add(rdbtnTcpip);
+		group.add(rdbtnTcpIp);
 		group.add(rdbtnUdp);
 
+		btnServerMonitor = new JButton("Server Monitor");
+		btnServerMonitor.addActionListener(this);
+		GridBagConstraints gbc_btnServerMonitor = new GridBagConstraints();
+		gbc_btnServerMonitor.insets = new Insets(0, 0, 5, 0);
+		gbc_btnServerMonitor.gridx = 3;
+		gbc_btnServerMonitor.gridy = 9;
+		GenPanel.add(btnServerMonitor, gbc_btnServerMonitor);
+
+		scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.gridwidth = 3;
+		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridx = 1;
+		gbc_scrollPane.gridy = 10;
+		GenPanel.add(scrollPane, gbc_scrollPane);
+
 		txtrReserved = new JTextArea();
-		txtrReserved.setLineWrap(true);
-		txtrReserved.setBackground(Color.LIGHT_GRAY);
-		GridBagConstraints gbc_txtpnReserved = new GridBagConstraints();
-		gbc_txtpnReserved.gridwidth = 3;
-		gbc_txtpnReserved.gridx = 1;
-		gbc_txtpnReserved.gridy = 10;
-		GenPanel.add(txtrReserved, gbc_txtpnReserved);
-		txtrReserved.setText("Reserved for connection log");
+		scrollPane.setViewportView(txtrReserved);
 
 		JPanel AdvPanel = new JPanel();
 		tabbedPane.addTab("Advanced", null, AdvPanel, null);
@@ -397,38 +434,43 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		gbc_chckbxAudioStream.gridy = 1;
 		AdvPanel.add(chckbxAudioStream, gbc_chckbxAudioStream);
 
-		JLabel lblReserveForDisplay = new JLabel("Reserved for audio file path");
-		GridBagConstraints gbc_lblReserveForDisplay = new GridBagConstraints();
-		gbc_lblReserveForDisplay.insets = new Insets(0, 0, 5, 5);
-		gbc_lblReserveForDisplay.gridx = 0;
-		gbc_lblReserveForDisplay.gridy = 2;
-		AdvPanel.add(lblReserveForDisplay, gbc_lblReserveForDisplay);
-
 		AudioFileButton = new JButton("Audio packets");
 		AudioFileButton.addActionListener(this);
 		AudioFileButton.setEnabled(false);
 		GridBagConstraints gbc_AudioFileButton = new GridBagConstraints();
 		gbc_AudioFileButton.insets = new Insets(0, 0, 5, 5);
 		gbc_AudioFileButton.gridx = 1;
-		gbc_AudioFileButton.gridy = 2;
+		gbc_AudioFileButton.gridy = 1;
 		AdvPanel.add(AudioFileButton, gbc_AudioFileButton);
 
-		comboBox = new JComboBox<String>();
-		comboBox.setEnabled(false);
-		comboBox.setModel(
-				new DefaultComboBoxModel<String>(new String[] { "---Select format---", "IVF file", "RTPdump file" }));
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.gridx = 1;
-		gbc_comboBox.gridy = 4;
-		AdvPanel.add(comboBox, gbc_comboBox);
+		txtrAudioFile = new JTextArea("Use Default Silence");
+		txtrAudioFile.setBackground(UIManager.getColor("Button.background"));
+		GridBagConstraints gbc_txtrAudioFile = new GridBagConstraints();
+		gbc_txtrAudioFile.anchor = GridBagConstraints.WEST;
+		gbc_txtrAudioFile.gridwidth = 2;
+		gbc_txtrAudioFile.insets = new Insets(0, 30, 5, 5);
+		gbc_txtrAudioFile.gridx = 0;
+		gbc_txtrAudioFile.gridy = 2;
+		AdvPanel.add(txtrAudioFile, gbc_txtrAudioFile);
 
-		JLabel lblReservedForVideo = new JLabel("Reserved for video file path");
-		GridBagConstraints gbc_lblReservedForVideo = new GridBagConstraints();
-		gbc_lblReservedForVideo.insets = new Insets(0, 0, 5, 5);
-		gbc_lblReservedForVideo.gridx = 0;
-		gbc_lblReservedForVideo.gridy = 5;
-		AdvPanel.add(lblReservedForVideo, gbc_lblReservedForVideo);
+		VideoFileButton = new JButton("Video packets");
+		VideoFileButton.addActionListener(this);
+		VideoFileButton.setEnabled(false);
+		GridBagConstraints gbc_VideoFileButton = new GridBagConstraints();
+		gbc_VideoFileButton.insets = new Insets(0, 0, 5, 5);
+		gbc_VideoFileButton.gridx = 1;
+		gbc_VideoFileButton.gridy = 4;
+		AdvPanel.add(VideoFileButton, gbc_VideoFileButton);
+
+		txtrVideoFile = new JTextArea("Use Default Fading From Black To White");
+		txtrVideoFile.setBackground(UIManager.getColor("Button.background"));
+		GridBagConstraints gbc_txtrVideoFile = new GridBagConstraints();
+		gbc_txtrVideoFile.anchor = GridBagConstraints.WEST;
+		gbc_txtrVideoFile.gridwidth = 2;
+		gbc_txtrVideoFile.insets = new Insets(0, 30, 5, 5);
+		gbc_txtrVideoFile.gridx = 0;
+		gbc_txtrVideoFile.gridy = 5;
+		AdvPanel.add(txtrVideoFile, gbc_txtrVideoFile);
 
 		chckbxVideoStream = new JCheckBox("Video Stream");
 		chckbxVideoStream.addItemListener(this);
@@ -437,14 +479,6 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		gbc_chckbxVideoStream.gridx = 0;
 		gbc_chckbxVideoStream.gridy = 4;
 		AdvPanel.add(chckbxVideoStream, gbc_chckbxVideoStream);
-
-		VideoFileButton = new JButton("Video packets");
-		VideoFileButton.setEnabled(false);
-		GridBagConstraints gbc_VideoFileButton = new GridBagConstraints();
-		gbc_VideoFileButton.insets = new Insets(0, 0, 5, 5);
-		gbc_VideoFileButton.gridx = 1;
-		gbc_VideoFileButton.gridy = 5;
-		AdvPanel.add(VideoFileButton, gbc_VideoFileButton);
 
 		chckbxOverallStats = new JCheckBox("Overall Stats");
 		chckbxOverallStats.setToolTipText("enable the logging of the overall stats at the end of the run");
@@ -489,6 +523,12 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 
 		chckbxNoStats = new JCheckBox("No Stats");
 		chckbxNoStats.addItemListener(this);
+		GridBagConstraints gbc_chckbxNoStats = new GridBagConstraints();
+		gbc_chckbxNoStats.ipadx = 43;
+		gbc_chckbxNoStats.insets = new Insets(0, 0, 5, 5);
+		gbc_chckbxNoStats.gridx = 0;
+		gbc_chckbxNoStats.gridy = 10;
+		AdvPanel.add(chckbxNoStats, gbc_chckbxNoStats);
 
 		JLabel lblAddingUserInterval = new JLabel("Adding User Interval (millisec.)");
 		GridBagConstraints gbc_lblAddingUserInterval = new GridBagConstraints();
@@ -496,12 +536,6 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 		gbc_lblAddingUserInterval.gridx = 1;
 		gbc_lblAddingUserInterval.gridy = 9;
 		AdvPanel.add(lblAddingUserInterval, gbc_lblAddingUserInterval);
-		GridBagConstraints gbc_chckbxNoStats = new GridBagConstraints();
-		gbc_chckbxNoStats.ipadx = 43;
-		gbc_chckbxNoStats.insets = new Insets(0, 0, 5, 5);
-		gbc_chckbxNoStats.gridx = 0;
-		gbc_chckbxNoStats.gridy = 10;
-		AdvPanel.add(chckbxNoStats, gbc_chckbxNoStats);
 
 		SpinnerModel smIV = new SpinnerNumberModel(2000, 1000, null, 100);
 		spnAddInterval = new JSpinner(smIV);
@@ -524,21 +558,34 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 	public void itemStateChanged(ItemEvent e) {
 		// TODO Auto-generated method stub
 		Object source = e.getSource();
+		if (source == rdbtnTcpIp) {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				txtXMPPdomain.setText("52.88.34.121");
+				txtXMPPhost.setText("52.88.34.121");
+				txtMUCdomain.setText("conference.52.88.34.121");
+			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+				txtXMPPdomain.setText("52.25.85.82");
+				txtXMPPhost.setText("52.25.85.82");
+				txtMUCdomain.setText("conference.52.25.85.82");
+			}
+		} // end of TCP/IP or UDP Selection
+
 		if (source == chckbxAudioStream) {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
 				AudioFileButton.setEnabled(true);
 			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
 				AudioFileButton.setEnabled(false);
 			}
-		} else if (source == chckbxVideoStream) {
+		}
+
+		if (source == chckbxVideoStream) {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
-				comboBox.setEnabled(true);
 				VideoFileButton.setEnabled(true);
 			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-				comboBox.setEnabled(false);
 				VideoFileButton.setEnabled(false);
 			}
 		}
+
 		if (source == chckbxNoStats) {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
 				chckbxOverallStats.setSelected(false);
@@ -560,10 +607,9 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		Object source = e.getSource();
-		if (source == btnApply) {
 
-			// We call initialize the Hammer (registering OSGi bundle for
-			// example)
+		if (source == btnApply) {
+			// We call initialize the Hammer
 			Hammer.init();
 
 			String XMPPdomain = txtXMPPdomain.getText();
@@ -572,12 +618,12 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 			String roomName = txtRoomName.getText();
 			int port = Integer.parseInt(txtPort.getText());
 			int numberOfFakeUsers = (Integer) spnFakeUsers.getValue();
+			// how long does the fake conference run in seconds. if 0 or
+			// negative, never stops.
 			int length = Integer.parseInt(txtLength.getText());
 
-			txtrReserved.setText("-XMPPdomain " + XMPPdomain + " -XMPPhost " + XMPPhost + " -MUCdomain " + MUCdomain
-					+ " -room " + roomName + " -port " + port + " -users " + numberOfFakeUsers + " -length " + length);
-
 			HostInfo hostInfo = new HostInfo(XMPPdomain, XMPPhost, port, MUCdomain, roomName);
+			txtrReserved.append("Host Info Constructed...");
 
 			/*
 			 * Construct MediaDeviceChooser
@@ -601,33 +647,47 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 					return 20L * 1000 * 1000;
 				}
 			};
-			String audioRtpdumpFile = "/Users/andy/git/jitsi-hammer/resources/rtp_opus.rtpdump";
-			MediaDevice audioMediaDevice = RtpdumpMediaDevice.createRtpdumpAudioMediaDevice(audioRtpdumpFile,
-					opusFormat);
-			// set video packet
-			String videoRtpdumpFile = "/Users/andy/git/jitsi-hammer/resources/rtp_vp8.rtpdump";
-			MediaDevice videoMediaDevice = RtpdumpMediaDevice.createRtpdumpVideoMediaDevice(videoRtpdumpFile,
-					Constants.VP8_RTP, factory.createMediaFormat("vp8", 90000));
+
+			// user select audio stream, if not use default silence stream
+			MediaDevice audioMediaDevice = null;
+			if (chckbxAudioStream.isSelected() && !txtrAudioFile.getText().equals("Use Default Silence.")) {
+				String audioRtpdumpFile = txtrAudioFile.getText();
+				audioMediaDevice = RtpdumpMediaDevice.createRtpdumpAudioMediaDevice(audioRtpdumpFile, opusFormat);
+			} else {
+				audioMediaDevice = new AudioSilenceMediaDevice();
+			}
+
+			// set video stream
+			MediaDevice videoMediaDevice = null;
+			if (chckbxVideoStream.isSelected()
+					&& !txtrVideoFile.getText().equals("Use Default Fading From Black To White")) {
+				String videoRtpdumpFile = txtrVideoFile.getText();
+				videoMediaDevice = RtpdumpMediaDevice.createRtpdumpVideoMediaDevice(videoRtpdumpFile, Constants.VP8_RTP,
+						factory.createMediaFormat("vp8", 90000));
+			} else {
+				videoMediaDevice = new VideoGreyFadingMediaDevice();
+			}
+
 			// add audio and video to MediaDeciveChooser mdc
 			mdc.setMediaDevice(audioMediaDevice);
 			mdc.setMediaDevice(videoMediaDevice);
 
 			List<Credential> credentials = null;
-			int interval = 2000;
-			boolean disableStats = false;
-			boolean overallStats = false;
-			boolean allStats = false;
-			boolean summaryStats = false;
-			int statsPolling = 5;
-			// how long does the fake conference run in seconds. if 0 or
-			// negative,
-			// never stops.
-			int runLength = 5;
+			int interval = (Integer) spnAddInterval.getValue();
+			boolean disableStats = chckbxNoStats.isSelected();
+			boolean overallStats = chckbxOverallStats.isSelected();
+			boolean allStats = chckbxAllStats.isSelected();
+			boolean summaryStats = chckbxSummaryStats.isSelected();
+			int statsPolling = (Integer) spnStatsPolling.getValue();
+
+			txtrReserved.append("Audio Stream: " + txtrAudioFile.getText() + "\n");
+			txtrReserved.append("Video Stream: " + txtrVideoFile.getText() + "\n");
 
 			/*
 			 * Construct Hammer
 			 */
-			final Hammer hammer = new Hammer(hostInfo, mdc, "Jitsi-Hammer", numberOfFakeUsers);
+			Hammer hammer = new Hammer(hostInfo, mdc, "BU-Testers", numberOfFakeUsers);
+			txtrReserved.append("Start Testing...\n");
 
 			// Cleanly stop the hammer when the program shutdown
 			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -645,10 +705,16 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 			// bridge
 			hammer.start(interval, disableStats, null, overallStats, allStats, summaryStats, statsPolling);
 
+			// open browser
+			StringBuffer roomUrl = new StringBuffer("http://");
+			roomUrl.append(XMPPhost).append("/").append(roomName);
+			openWebpage(roomUrl.toString());
+
 			// Set the fake conference to stop depending on runLength
-			if (runLength > 0) {
+			/* This part not working now, just comment
+			if (length > 0) {
 				try {
-					Thread.sleep(runLength * 1000);
+					Thread.sleep(length * 1000);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -662,10 +728,83 @@ public class NetworkMonitor implements ItemListener, ActionListener {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-			}
-		} // end of btnApply
-		else if (source == AudioFileButton) {
+			}*/
 
+		} // end of btnApply
+
+		else if (source == AudioFileButton) {
+			JFileChooser chooser = new JFileChooser();
+			FileNameExtensionFilter audioFilter = new FileNameExtensionFilter("Audio Files", "rtpdump");
+			chooser.setFileFilter(audioFilter);
+			if (JFileChooser.APPROVE_OPTION == chooser.showOpenDialog(null)) {
+				File file = chooser.getSelectedFile();
+				txtrAudioFile.setText(file.getAbsolutePath());
+			}
+		} // end of Audio File chooser
+
+		else if (source == VideoFileButton) {
+			JFileChooser chooser = new JFileChooser();
+			FileNameExtensionFilter rtpFilter = new FileNameExtensionFilter("Rtpdump Files", "rtpdump");
+			FileNameExtensionFilter ivfFilter = new FileNameExtensionFilter("IVF Files", "ivf");
+			chooser.addChoosableFileFilter(rtpFilter);
+			chooser.addChoosableFileFilter(ivfFilter);
+			if (JFileChooser.APPROVE_OPTION == chooser.showOpenDialog(null)) {
+				File file = chooser.getSelectedFile();
+				txtrVideoFile.setText(file.getAbsolutePath());
+			}
+		} // end of Video File chooser
+
+		else if (source == btnServerMonitor) {
+			StringBuffer serverPage = new StringBuffer("http://");
+			serverPage.append(txtXMPPhost.getText()).append(":3000");
+			openWebpage(serverPage.toString());
+			// write log
+			txtrReserved.append("Open Server Stats Page!\n");
+		}
+	}
+
+	public void focusLost(FocusEvent e) {
+		Object source = e.getSource();
+		if (source == txtXMPPhost) {
+			txtMUCdomain.setText("conference." + txtXMPPhost.getText());
+		}
+	}
+
+	@Override
+	public void focusGained(FocusEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * Open browser to the fake room page. Cross platform solution
+	 * 
+	 * @param roomUrl
+	 */
+	public static void openWebpage(String roomUrl) {
+		URL url;
+		try {
+			url = new URL(roomUrl);
+			if (Desktop.isDesktopSupported()) {
+				Desktop desktop = Desktop.getDesktop();
+				try {
+					desktop.browse(url.toURI());
+				} catch (IOException | URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			} else {
+				Runtime runtime = Runtime.getRuntime();
+				try {
+					runtime.exec("open " + url);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		} catch (MalformedURLException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
 	}
 }
