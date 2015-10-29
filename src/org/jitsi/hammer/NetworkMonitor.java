@@ -537,7 +537,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		gbc_lblAddingUserInterval.gridy = 9;
 		AdvPanel.add(lblAddingUserInterval, gbc_lblAddingUserInterval);
 
-		SpinnerModel smIV = new SpinnerNumberModel(2000, 1000, null, 100);
+		SpinnerModel smIV = new SpinnerNumberModel(2000, 500, null, 100);
 		spnAddInterval = new JSpinner(smIV);
 		GridBagConstraints gbc_spnAddInterval = new GridBagConstraints();
 		gbc_spnAddInterval.ipadx = 30;
@@ -692,11 +692,11 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			// Cleanly stop the hammer when the program shutdown
 			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 				public void run() {
-					System.out.println("Stopping Jitsi-Hammer...");
+					txtrReserved.append("Stopping Jitsi-Hammer...\n");
 
 					hammer.stop();
 
-					System.out.println("Exiting the program...");
+					txtrReserved.append("Exiting the program...\n");
 				}
 			}));
 
@@ -759,7 +759,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			serverPage.append(txtXMPPhost.getText()).append(":3000");
 			openWebpage(serverPage.toString());
 			// write log
-			txtrReserved.append("Open Server Stats Page!\n");
+			txtrReserved.append("Open Server Stats Page...\n");
 		}
 	}
 
