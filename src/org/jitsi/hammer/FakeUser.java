@@ -375,8 +375,11 @@ public class FakeUser implements PacketListener
             + " and disconnecting from the XMPP server");
         if(agent != null)
             agent.free();
+        /*
         for(MediaStream stream : mediaStreamMap.values())
         {
+        	stream.stop();
+        	System.out.println("after stream stop!");
             stream.close();
         }
         if(connection !=null)
@@ -395,6 +398,8 @@ public class FakeUser implements PacketListener
             if(muc != null) muc.leave();
             connection.disconnect();
         }
+        */
+        connection.disconnect();
     }
 
 

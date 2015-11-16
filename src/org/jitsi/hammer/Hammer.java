@@ -1,19 +1,3 @@
-/*
- * Copyright @ 2015 Atlassian Pty Ltd
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.jitsi.hammer;
 
 import org.jitsi.hammer.stats.*;
@@ -33,13 +17,8 @@ import org.jitsi.util.Logger;
 import java.util.*;
 
 /**
- *
- * @author Thomas Kuntz
- *
- *         The <tt>Hammer</tt> class is the core class of the jitsi-hammer
- *         project. This class will try to create N virtual users to a XMPP
+ *         This class will try to create N virtual users to a XMPP
  *         server then to a MUC chatroom created by JitMeet
- *         (https://jitsi.org/Projects/JitMeet).
  *
  *         Each virtual user after succeeding in the connection to the JitMeet
  *         MUC receive an invitation to a audio/video conference. After
@@ -92,25 +71,7 @@ public class Hammer {
 	private static final String[][] BUNDLES = {
 
 			{ "net/java/sip/communicator/impl/libjitsi/LibJitsiActivator" }
-			// These bundles are used in Jitsi-Videobridge from which I copied
-			// some code, but these bundle doesn't seems necessary for the
-			// hammer
-			/*
-			 * , { "net/java/sip/communicator/util/UtilActivator",
-			 * "net/java/sip/communicator/impl/fileaccess/FileAccessActivator"
-			 * }, {
-			 * "net/java/sip/communicator/impl/configuration/ConfigurationActivator"
-			 * }, {
-			 * "net/java/sip/communicator/impl/resources/ResourceManagementActivator"
-			 * }, { "net/java/sip/communicator/util/dns/DnsUtilActivator" }, {
-			 * "net/java/sip/communicator/impl/netaddr/NetaddrActivator" }, {
-			 * "net/java/sip/communicator/impl/packetlogging/PacketLoggingActivator"
-			 * }, {
-			 * "net/java/sip/communicator/service/gui/internal/GuiServiceActivator"
-			 * }, {
-			 * "net/java/sip/communicator/service/protocol/media/ProtocolMediaActivator"
-			 * }, { "org/jitsi/hammer/HammerActivator" }
-			 */
+
 	};
 
 	/**
@@ -326,6 +287,7 @@ public class Hammer {
 	 */
 	private void startUsersAnonymous(int wait) {
 		//logger.info("Starting the Hammer : starting all " + "FakeUsers with anonymous login");
+		NetworkMonitor.GUILog.append("Starting the Hammer : FakeUsers with anonymous login\n");
 		try {
 			for (FakeUser user : fakeUsers) {
 				FakeUserStats userStats;

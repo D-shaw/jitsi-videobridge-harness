@@ -70,7 +70,7 @@ import javax.swing.ScrollPaneConstants;
 
 public class NetworkMonitor implements ItemListener, ActionListener, FocusListener {
 
-	public static StringBuffer guiLog = new StringBuffer("");
+	public static StringBuffer GUILog = new StringBuffer("");
 
 	private JFrame frmTestHarness;
 	private JTextField txtXMPPdomain;
@@ -623,7 +623,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			int length = Integer.parseInt(txtLength.getText());
 
 			HostInfo hostInfo = new HostInfo(XMPPdomain, XMPPhost, port, MUCdomain, roomName);
-			txtrReserved.append("Host Info Constructed...");
+			txtrReserved.append("Host Info Constructed...\n");
 
 			/*
 			 * Construct MediaDeviceChooser
@@ -692,7 +692,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			// Cleanly stop the hammer when the program shutdown
 			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 				public void run() {
-					txtrReserved.append("Stopping Jitsi-Hammer...\n");
+					txtrReserved.append("Stopping Test - Harness...\n");
 
 					hammer.stop();
 
@@ -704,6 +704,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			// connect to the XMPP server and try to setup media stream with it
 			// bridge
 			hammer.start(interval, disableStats, null, overallStats, allStats, summaryStats, statsPolling);
+			txtrReserved.append("\n" + GUILog.toString());
 
 			// open browser
 			StringBuffer roomUrl = new StringBuffer("http://");
@@ -711,15 +712,17 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			openWebpage(roomUrl.toString());
 
 			// Set the fake conference to stop depending on runLength
-			/* This part not working now, just comment
+			/*  This part not working now, just comment
 			if (length > 0) {
+	
 				try {
 					Thread.sleep(length * 1000);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				hammer.stop();
+					hammer.stop();
+				
 			} else {
 				while (true)
 					try {
@@ -728,7 +731,20 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-			}*/
+			} */
+			
+			if(length>0) {
+				try {
+					Thread.sleep(length * 1000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				finally{
+					hammer.stop();
+					txtrReserved.append("Test Stop");
+				}
+			}
 
 		} // end of btnApply
 
