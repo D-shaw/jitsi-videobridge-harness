@@ -5,6 +5,7 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var db = require('../config/db');
 var JitsiDashboard = mongoose.model('JitsiDashboard');
+var rest = require('../config/rest');
 
 // // for render .html file.
 // var path = require("path");
