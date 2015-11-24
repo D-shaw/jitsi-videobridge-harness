@@ -53,6 +53,8 @@ import javax.swing.JCheckBox;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -87,6 +89,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 	private JButton btnApply;
 	private JButton btnReset;
+	private JButton btnOutputLog;
 	private JButton btnAssist;
 	private JButton btnServerMonitor;
 	private JButton AudioFileButton;
@@ -275,20 +278,29 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		gbc_btnApply.gridx = 0;
 		gbc_btnApply.gridy = 7;
 		panel.add(btnApply, gbc_btnApply);
+		
+		btnOutputLog = new JButton("OUTPUT LOG");
+		btnOutputLog.addActionListener(this);
+		GridBagConstraints gbc_btnOutputLog = new GridBagConstraints();
+		gbc_btnOutputLog.anchor = GridBagConstraints.SOUTH;
+		gbc_btnOutputLog.insets = new Insets(0, 0, 5, 0);
+		gbc_btnOutputLog.gridx = 0;
+		gbc_btnOutputLog.gridy = 8;
+		panel.add(btnOutputLog, gbc_btnOutputLog);
 
 		btnReset = new JButton("RESET");
 		GridBagConstraints gbc_btnReset = new GridBagConstraints();
 		gbc_btnReset.anchor = GridBagConstraints.SOUTH;
 		gbc_btnReset.insets = new Insets(0, 0, 5, 0);
 		gbc_btnReset.gridx = 0;
-		gbc_btnReset.gridy = 8;
+		gbc_btnReset.gridy = 9;
 		panel.add(btnReset, gbc_btnReset);
 
 		btnAssist = new JButton("ASSIST ME...");
 		GridBagConstraints gbc_btnAssist = new GridBagConstraints();
 		gbc_btnAssist.anchor = GridBagConstraints.SOUTH;
 		gbc_btnAssist.gridx = 0;
-		gbc_btnAssist.gridy = 9;
+		gbc_btnAssist.gridy = 10;
 		panel.add(btnAssist, gbc_btnAssist);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -611,6 +623,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		if (source == btnApply) {
 			// We call initialize the Hammer
 			Hammer.init();
+//			System.out.println("Im done");
 
 			String XMPPdomain = txtXMPPdomain.getText();
 			String XMPPhost = txtXMPPhost.getText();
@@ -743,10 +756,21 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 				finally{
 					hammer.stop();
 					txtrReserved.append("Test Stop");
+					
 				}
 			}
 
 		} // end of btnApply
+		
+		 if (source == btnOutputLog){
+			try {
+				java.awt.Desktop.getDesktop().edit(new File("/Users/Ritika/Desktop/Hammer_Stats"));
+				System.out.println("Im done");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			
+		}
 
 		else if (source == AudioFileButton) {
 			JFileChooser chooser = new JFileChooser();
