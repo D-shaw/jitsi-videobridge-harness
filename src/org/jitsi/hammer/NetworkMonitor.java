@@ -1,5 +1,11 @@
 package org.jitsi.hammer;
 
+/**
+ * Jitsi TestHarness GUI application.
+ * 
+ * @author andy
+ *
+ */
 import java.awt.EventQueue;
 
 import javax.media.Format;
@@ -21,6 +27,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+// import javax.swing.Timer;
 
 import org.jitsi.hammer.Credential;
 import org.jitsi.hammer.Hammer;
@@ -46,9 +53,7 @@ import java.awt.Toolkit;
 
 import javax.swing.JSpinner;
 import javax.swing.JRadioButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -60,13 +65,14 @@ import java.net.URL;
 import java.util.List;
 import java.awt.event.ItemEvent;
 import java.awt.Font;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NetworkMonitor implements ItemListener, ActionListener, FocusListener {
 
@@ -104,7 +110,9 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 	private JCheckBox chckbxSummaryStats;
 	private JCheckBox chckbxNoStats;
 	private JScrollPane scrollPane;
-	private JTextArea txtrReserved;
+	public JTextArea txtrReserved;
+	
+	private JPanel GenPanel = new JPanel();
 
 	/**
 	 * Launch the application.
@@ -115,12 +123,12 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		String vmVendor = System.getProperty("java.vendor");
 		String osName = System.getProperty("os.name");
 
-		Main.setSystemProperties(osName);
-		Main.setScHomeDir(osName);
+		Config.setSystemProperties(osName);
+		Config.setScHomeDir(osName);
 
 		// this needs to be set before any DNS lookup is run
-		File f = new File(System.getProperty(Main.PNAME_SC_HOME_DIR_LOCATION),
-				System.getProperty(Main.PNAME_SC_HOME_DIR_NAME) + File.separator + ".usednsjava");
+		File f = new File(System.getProperty(Config.PNAME_SC_HOME_DIR_LOCATION),
+				System.getProperty(Config.PNAME_SC_HOME_DIR_NAME) + File.separator + ".usednsjava");
 		if (f.exists()) {
 			System.setProperty("sun.net.spi.nameservice.provider.1", "dns,dnsjava");
 		}
@@ -294,12 +302,12 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		frmTestHarness.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-		JPanel GenPanel = new JPanel();
+		
 		tabbedPane.addTab("General", null, GenPanel, null);
 		GridBagLayout gbl_GenPanel = new GridBagLayout();
-		gbl_GenPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
+		gbl_GenPanel.columnWidths = new int[] { 50, 160, 70, 160, 50, 0 };
 		gbl_GenPanel.rowHeights = new int[] { 35, 0, 0, 35, 0, 0, 35, 0, 0, 0, 0 };
-		gbl_GenPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE };
+		gbl_GenPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		gbl_GenPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
 		GenPanel.setLayout(gbl_GenPanel);
 
@@ -312,14 +320,16 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 		JLabel lblPort = new JLabel("Port");
 		GridBagConstraints gbc_lblPort = new GridBagConstraints();
-		gbc_lblPort.insets = new Insets(0, 0, 5, 0);
+		gbc_lblPort.insets = new Insets(0, 0, 5, 5);
 		gbc_lblPort.gridx = 3;
 		gbc_lblPort.gridy = 1;
 		GenPanel.add(lblPort, gbc_lblPort);
 
 		txtRoomName = new JTextField();
+		txtRoomName.setSize(90, 35);
 		txtRoomName.setText("TestHarness");
 		GridBagConstraints gbc_txtRoomName = new GridBagConstraints();
+		gbc_txtRoomName.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtRoomName.insets = new Insets(0, 0, 5, 5);
 		gbc_txtRoomName.gridx = 1;
 		gbc_txtRoomName.gridy = 2;
@@ -329,7 +339,8 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		txtPort = new JTextField();
 		txtPort.setText("5222");
 		GridBagConstraints gbc_txtPort = new GridBagConstraints();
-		gbc_txtPort.insets = new Insets(0, 0, 5, 0);
+		gbc_txtPort.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtPort.insets = new Insets(0, 0, 5, 5);
 		gbc_txtPort.gridx = 3;
 		gbc_txtPort.gridy = 2;
 		GenPanel.add(txtPort, gbc_txtPort);
@@ -344,12 +355,12 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 		JLabel lblDuration = new JLabel("Duration (.sec)");
 		GridBagConstraints gbc_lblDuration = new GridBagConstraints();
-		gbc_lblDuration.insets = new Insets(0, 0, 5, 0);
+		gbc_lblDuration.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDuration.gridx = 3;
 		gbc_lblDuration.gridy = 4;
 		GenPanel.add(lblDuration, gbc_lblDuration);
 
-		SpinnerModel smFU = new SpinnerNumberModel(1, 1, null, 1);
+		SpinnerModel smFU = new SpinnerNumberModel(5, 1, null, 1);
 		spnFakeUsers = new JSpinner(smFU);
 		GridBagConstraints gbc_spnFakeUsers = new GridBagConstraints();
 		gbc_spnFakeUsers.ipadx = 50;
@@ -359,9 +370,10 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		GenPanel.add(spnFakeUsers, gbc_spnFakeUsers);
 
 		txtLength = new JTextField();
-		txtLength.setText("0");
+		txtLength.setText("1");
 		GridBagConstraints gbc_txtLength = new GridBagConstraints();
-		gbc_txtLength.insets = new Insets(0, 0, 5, 0);
+		gbc_txtLength.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtLength.insets = new Insets(0, 0, 5, 5);
 		gbc_txtLength.gridx = 3;
 		gbc_txtLength.gridy = 5;
 		GenPanel.add(txtLength, gbc_txtLength);
@@ -398,15 +410,15 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		btnServerMonitor = new JButton("Server Monitor");
 		btnServerMonitor.addActionListener(this);
 		GridBagConstraints gbc_btnServerMonitor = new GridBagConstraints();
-		gbc_btnServerMonitor.insets = new Insets(0, 0, 5, 0);
+		gbc_btnServerMonitor.insets = new Insets(0, 0, 5, 5);
 		gbc_btnServerMonitor.gridx = 3;
 		gbc_btnServerMonitor.gridy = 9;
 		GenPanel.add(btnServerMonitor, gbc_btnServerMonitor);
 
 		scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.gridwidth = 3;
 		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
+		gbc_scrollPane.gridwidth = 3;
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 1;
 		gbc_scrollPane.gridy = 10;
@@ -537,7 +549,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		gbc_lblAddingUserInterval.gridy = 9;
 		AdvPanel.add(lblAddingUserInterval, gbc_lblAddingUserInterval);
 
-		SpinnerModel smIV = new SpinnerNumberModel(2000, 500, null, 100);
+		SpinnerModel smIV = new SpinnerNumberModel(0,0, null, 100);
 		spnAddInterval = new JSpinner(smIV);
 		GridBagConstraints gbc_spnAddInterval = new GridBagConstraints();
 		gbc_spnAddInterval.ipadx = 30;
@@ -556,7 +568,6 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
 		Object source = e.getSource();
 		if (source == rdbtnTcpIp) {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -564,9 +575,9 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 				txtXMPPhost.setText("52.88.34.121");
 				txtMUCdomain.setText("conference.52.88.34.121");
 			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-				txtXMPPdomain.setText("52.25.85.82");
-				txtXMPPhost.setText("52.25.85.82");
-				txtMUCdomain.setText("conference.52.25.85.82");
+				txtXMPPdomain.setText("52.11.166.131");
+				txtXMPPhost.setText("52.11.166.131");
+				txtMUCdomain.setText("conference.52.11.166.131");
 			}
 		} // end of TCP/IP or UDP Selection
 
@@ -605,11 +616,10 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		Object source = e.getSource();
 
 		if (source == btnApply) {
-			// We call initialize the Hammer
+			// We call initialize the Hammer framework
 			Hammer.init();
 
 			String XMPPdomain = txtXMPPdomain.getText();
@@ -618,8 +628,8 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			String roomName = txtRoomName.getText();
 			int port = Integer.parseInt(txtPort.getText());
 			int numberOfFakeUsers = (Integer) spnFakeUsers.getValue();
-			// how long does the fake conference run in seconds. if 0 or
-			// negative, never stops.
+			// how long does the fake conference run in seconds.
+			// Should to be positive number
 			int length = Integer.parseInt(txtLength.getText());
 
 			HostInfo hostInfo = new HostInfo(XMPPdomain, XMPPhost, port, MUCdomain, roomName);
@@ -629,12 +639,14 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			 * Construct MediaDeviceChooser
 			 */
 			MediaDeviceChooser mdc = new MediaDeviceChooser();
-
 			MediaService service = LibJitsi.getMediaService();
 			MediaFormatFactory factory = service.getFormatFactory();
-			// set audio packet
-			AudioFormat opusFormat = new AudioFormat(Constants.OPUS_RTP, 48000, Format.NOT_SPECIFIED,
-					2 /* channels */) {
+			txtrReserved.append("Creating media device chooser in the application.\n");
+			/*
+			 * set audio packet parameter for AudioFormat constructor: encoding,
+			 * clockRate, AudioFormat.NOT_SPECIFIED, channels
+			 */
+			AudioFormat opusFormat = new AudioFormat(Constants.OPUS_RTP, 48000, Format.NOT_SPECIFIED, 2) {
 				/**
 				 * FMJ depends on this value when it calculates the RTP
 				 * timestamps on the packets that it sends.
@@ -671,8 +683,12 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			// add audio and video to MediaDeciveChooser mdc
 			mdc.setMediaDevice(audioMediaDevice);
 			mdc.setMediaDevice(videoMediaDevice);
+			txtrReserved.append("Audio Stream: " + txtrAudioFile.getText() + "\n");
+			txtrReserved.append("Video Stream: " + txtrVideoFile.getText() + "\n");
 
+			// credential login for future implementation
 			List<Credential> credentials = null;
+
 			int interval = (Integer) spnAddInterval.getValue();
 			boolean disableStats = chckbxNoStats.isSelected();
 			boolean overallStats = chckbxOverallStats.isSelected();
@@ -680,22 +696,18 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			boolean summaryStats = chckbxSummaryStats.isSelected();
 			int statsPolling = (Integer) spnStatsPolling.getValue();
 
-			txtrReserved.append("Audio Stream: " + txtrAudioFile.getText() + "\n");
-			txtrReserved.append("Video Stream: " + txtrVideoFile.getText() + "\n");
-
 			/*
 			 * Construct Hammer
 			 */
 			Hammer hammer = new Hammer(hostInfo, mdc, "BU-Testers", numberOfFakeUsers);
+			// System.out.println(mdc.toString());
 			txtrReserved.append("Start Testing...\n");
 
 			// Cleanly stop the hammer when the program shutdown
 			Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 				public void run() {
 					txtrReserved.append("Stopping Test - Harness...\n");
-
 					hammer.stop();
-
 					txtrReserved.append("Exiting the program...\n");
 				}
 			}));
@@ -704,6 +716,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			// connect to the XMPP server and try to setup media stream with it
 			// bridge
 			hammer.start(interval, disableStats, null, overallStats, allStats, summaryStats, statsPolling);
+//			System.out.println("After Hammer start:  " + txtRoomName.getText());
 			txtrReserved.append("\n" + GUILog.toString());
 
 			// open browser
@@ -712,39 +725,19 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			openWebpage(roomUrl.toString());
 
 			// Set the fake conference to stop depending on runLength
-			/*  This part not working now, just comment
-			if (length > 0) {
-	
-				try {
-					Thread.sleep(length * 1000);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-					hammer.stop();
+			// if (length > 0) {
+			new Timer().schedule(new TimerTask() {
 				
-			} else {
-				while (true)
-					try {
-						Thread.sleep(3600000);
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-			} */
-			
-			if(length>0) {
-				try {
-					Thread.sleep(length * 1000);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				finally{
+				public void run() {
 					hammer.stop();
 					txtrReserved.append("Test Stop");
+//					System.out.println("After Hammer stop:  " + txtRoomName.getText());
+
 				}
-			}
+			}, length * 1000);
+
+				
+			// }
 
 		} // end of btnApply
 
@@ -772,7 +765,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 		else if (source == btnServerMonitor) {
 			StringBuffer serverPage = new StringBuffer("http://");
-			serverPage.append(txtXMPPhost.getText()).append(":3000");
+			serverPage.append("52.88.34.121").append(":3000");
 			openWebpage(serverPage.toString());
 			// write log
 			txtrReserved.append("Open Server Stats Page...\n");
@@ -788,7 +781,6 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 
 	@Override
 	public void focusGained(FocusEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -806,7 +798,6 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 				try {
 					desktop.browse(url.toURI());
 				} catch (IOException | URISyntaxException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			} else {
@@ -814,12 +805,10 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 				try {
 					runtime.exec("open " + url);
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
 		} catch (MalformedURLException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
 	}
