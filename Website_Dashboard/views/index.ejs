@@ -76,7 +76,7 @@
                     <div class="intro-text">
                         <span class="name">Jitsi Test Tool</span>
                         <hr class="star-light">
-                        <span class="skills">Version-Alpha 1.0.0</span>
+                        <span class="skills">Version-Beta 1.0.0</span>
                     </div>
                 </div>
             </div>
@@ -139,34 +139,41 @@
                             
                                 
                             </div>
+                            <input size="16" type="text" value="2012-06-15 14:45" readonly class="form_datetime">
+ 
+<script type="text/javascript">
+    $(".form_datetime").datetimepicker({format: 'yyyy-mm-dd hh:ii'});
+</script> 
+
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="row">
-                                <div class="col-lg-5">
+                                <div class="col-lg-10">
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-hover table-striped">
+                                            
                                             <thead>
                                                 <tr>
-                                                    <th>endpoints(int)</th>
-                                                    <th>amt_SentMB(Double)</th>
-                                                    <th>send_bRateMBps(Double)</th>
-                                                    <th>amt_RevMB(Double)</th>
-                                                    <th>rev_bRateMBps(Double)</th>
-                                                    <th>aud_pkgLost(float)</th>
-                                                    <th>vid_pkgLost(float)</th>
+                                                    <th class="text-center">Number of Fake Users</th>
+                                                    <th class="text-center">Traffic Sent (MB)</th>
+                                                    <th class="text-center">Send Speed (Mbps)</th>
+                                                    <th class="text-center">Traffic Received (MB)</th>
+                                                    <th class="text-center">Receive Speed (MBps)</th>
+                                                    <th class="text-center">Audio Packet Loss</th>
+                                                    <th class="text-center">Video Packet Loss</th>
                                                    </tr>
                                             </thead>
                                             <tbody>
                                                 <% boardRows.forEach( function(boardRow) { %>
                                                     <tr>
-                                                        <td><%= boardRow.endpoints%></td>
-                                                        <td><%= boardRow.amountsentmb%></td>
-                                                        <td><%= boardRow.sendbitrate%></td>
-                                                        <td><%= boardRow.amountrevceivemb%></td>
-                                                        <td><%= boardRow.receivebitrate%></td>
-                                                        <td><%= boardRow.audiopackagelost%></td>
-                                                        <td><%= boardRow.vidwopackagelost%></td>
+                                                        <td class="text-center"><%= boardRow.endpoints%></td>
+                                                        <td class="text-center"><%= boardRow.amountsentmb%></td>
+                                                        <td class="text-center"><%= boardRow.sendbitrate%></td>
+                                                        <td class="text-center"><%= boardRow.amountrevceivemb%></td>
+                                                        <td class="text-center"><%= boardRow.receivebitrate%></td>
+                                                        <td class="text-center"><%= boardRow.audiopackagelost%></td>
+                                                        <td class="text-center"><%= boardRow.vidwopackagelost%></td>
                                                     </tr>
                                                 <%});%>
                                             </tbody>
