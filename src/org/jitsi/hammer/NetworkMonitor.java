@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.awt.event.ItemEvent;
 import java.awt.Font;
@@ -109,6 +111,8 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 	private JScrollPane scrollPane;
 	private JTextArea txtrReserved;
 
+	public static int numberOfFakeUsers;
+
 	/**
 	 * Launch the application.
 	 */
@@ -154,7 +158,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 					NetworkMonitor window = new NetworkMonitor();
 					window.frmTestHarness.setVisible(true);
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 			}
 		});
@@ -278,7 +282,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		gbc_btnApply.gridx = 0;
 		gbc_btnApply.gridy = 7;
 		panel.add(btnApply, gbc_btnApply);
-		
+
 		btnOutputLog = new JButton("OUTPUT LOG");
 		btnOutputLog.addActionListener(this);
 		GridBagConstraints gbc_btnOutputLog = new GridBagConstraints();
@@ -369,6 +373,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		gbc_spnFakeUsers.gridx = 1;
 		gbc_spnFakeUsers.gridy = 5;
 		GenPanel.add(spnFakeUsers, gbc_spnFakeUsers);
+		spnFakeUsers.getValue();
 
 		txtLength = new JTextField();
 		txtLength.setText("0");
@@ -614,6 +619,8 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			}
 		}
 	}
+	// String timeStampStart = new
+	// SimpleDateFormat("MM/dd/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime());
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -623,14 +630,15 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		if (source == btnApply) {
 			// We call initialize the Hammer
 			Hammer.init();
-//			System.out.println("Im done");
-
+			String timeStampStart = new SimpleDateFormat("MM/dd/yyyy_HH:mm:ss")
+					.format(Calendar.getInstance().getTime());
 			String XMPPdomain = txtXMPPdomain.getText();
 			String XMPPhost = txtXMPPhost.getText();
 			String MUCdomain = txtMUCdomain.getText();
 			String roomName = txtRoomName.getText();
 			int port = Integer.parseInt(txtPort.getText());
-			int numberOfFakeUsers = (Integer) spnFakeUsers.getValue();
+			numberOfFakeUsers = (Integer) spnFakeUsers.getValue();
+			System.out.println("network monitor " + numberOfFakeUsers);
 			// how long does the fake conference run in seconds. if 0 or
 			// negative, never stops.
 			int length = Integer.parseInt(txtLength.getText());
@@ -725,51 +733,45 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			openWebpage(roomUrl.toString());
 
 			// Set the fake conference to stop depending on runLength
-			/*  This part not working now, just comment
+			/*
+			 * This part not working now, just comment if (length > 0) {
+			 * 
+			 * try { Thread.sleep(length * 1000); } catch (InterruptedException
+			 * e1) { // TODO Auto-generated catch block e1.printStackTrace(); }
+			 * hammer.stop();
+			 * 
+			 * } else { while (true) try { Thread.sleep(3600000); } catch
+			 * (InterruptedException e1) { // TODO Auto-generated catch block
+			 * e1.printStackTrace(); } }
+			 */
+
 			if (length > 0) {
-	
 				try {
 					Thread.sleep(length * 1000);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-					hammer.stop();
-				
-			} else {
-				while (true)
-					try {
-						Thread.sleep(3600000);
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-			} */
-			
-			if(length>0) {
-				try {
-					Thread.sleep(length * 1000);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				finally{
+					//e1.printStackTrace();
+				} finally {
 					hammer.stop();
 					txtrReserved.append("Test Stop");
-					
+
 				}
 			}
 
 		} // end of btnApply
-		
-		 if (source == btnOutputLog){
-			try {
-				java.awt.Desktop.getDesktop().edit(new File("/Users/Ritika/Desktop/Hammer_Stats"));
-				System.out.println("Im done");
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			
+
+		if (source == btnOutputLog) {
+			CreateStatFile.main(null);
+			// String timeStamp = new
+			// SimpleDateFormat("MM/dd/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime());
+			// java.awt.Desktop.getDesktop().edit(new
+			// File("/Users/Ritika/Desktop/JITSI Test Harness Log"));
+			txtrReserved.append("Creating new log at ");
+			// txtrReserved.append(timeStamp);
+			txtrReserved.append("\n");
+			txtrReserved.append("Room created at ");
+			// txtrReserved.append(timeStampStart);
+
 		}
 
 		else if (source == AudioFileButton) {
@@ -831,7 +833,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 					desktop.browse(url.toURI());
 				} catch (IOException | URISyntaxException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
 			} else {
 				Runtime runtime = Runtime.getRuntime();
@@ -839,12 +841,12 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 					runtime.exec("open " + url);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
 			}
 		} catch (MalformedURLException e2) {
 			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			//e2.printStackTrace();
 		}
 	}
 }
