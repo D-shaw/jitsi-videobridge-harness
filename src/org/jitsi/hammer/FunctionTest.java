@@ -15,8 +15,8 @@ public class FunctionTest {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		System.out.println(HammerStats.class);
-		System.out.println(System.getProperty(Main.PNAME_SC_HOME_DIR_LOCATION) + File.separator
-				+ System.getProperty(Main.PNAME_SC_HOME_DIR_NAME) + File.separator + "stats");
+		System.out.println(System.getProperty(Config.PNAME_SC_HOME_DIR_LOCATION) + File.separator
+				+ System.getProperty(Config.PNAME_SC_HOME_DIR_NAME) + File.separator + "stats");
 		System.out.println(File.separator);
 
 		String XMPPhost = "52.88.34.121";

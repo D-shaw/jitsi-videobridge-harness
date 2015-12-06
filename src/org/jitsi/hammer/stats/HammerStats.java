@@ -1,4 +1,3 @@
-
 package org.jitsi.hammer.stats;
 
 
@@ -106,11 +105,15 @@ public class HammerStats implements Runnable
      */
     public HammerStats()
     {
+    	/*
         this( System.getProperty(Main.PNAME_SC_HOME_DIR_LOCATION)
             + File.separator
             + System.getProperty(Main.PNAME_SC_HOME_DIR_NAME)
             + File.separator
             + HammerStats.STATS_DIR_NAME);
+            */
+    	
+    	this(System.getProperty("user.home") + "/Desktop/stats");
     }
 
     /**
@@ -125,6 +128,8 @@ public class HammerStats implements Runnable
             statsDirectoryPath
             + File.separator
             + new SimpleDateFormat("yyyy-MM-dd'  'HH'h'mm'm'ss's'").format(new Date());
+        
+        System.out.println("Stats directory: " + statsDirectoryPath);
 
         this.overallStatsFile = new File(
             this.statsDirectoryPath
@@ -171,6 +176,8 @@ public class HammerStats implements Runnable
         }
 
         logger.info("Running the main loop");
+        System.out.println("Inside HammerStats run method.\n");
+        
         while (!threadStop)
         {
             synchronized(this)
@@ -178,7 +185,7 @@ public class HammerStats implements Runnable
                 if(overallStatsLogging || allStatsLogging || summaryStatsLogging)
                 {
                     if(allStatsLogging || summaryStatsLogging)
-                    {
+                    {                    	
                         if(writer == null)
                         {
                             try
@@ -336,6 +343,8 @@ public class HammerStats implements Runnable
         if (!threadStop)
         {
             logger.info("Stopping the main loop");
+            
+            System.out.println("Stopping the HammerStats stop.\n");
             threadStop = true;
         }
     }

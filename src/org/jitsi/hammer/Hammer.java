@@ -17,19 +17,16 @@ import org.jitsi.util.Logger;
 import java.util.*;
 
 /**
- *         This class will try to create N virtual users to a XMPP
- *         server then to a MUC chatroom created by JitMeet
+ * This class will try to create N virtual users to a XMPP server then to a MUC
+ * chatroom created by JitMeet
  *
- *         Each virtual user after succeeding in the connection to the JitMeet
- *         MUC receive an invitation to a audio/video conference. After
- *         receiving the invitation, each virtual user will positively reply to
- *         the invitation and start sending audio and video data to the
- *         jitsi-videobridge handling the conference.
+ * Each virtual user after succeeding in the connection to the JitMeet MUC and
+ * start sending audio and video data to the jitsi-videobridge handling the
+ * conference.
  */
 public class Hammer {
 	/**
-	 * The <tt>Logger</tt> used by the <tt>Hammer</tt> class and its instances
-	 * for logging output.
+	 * The Logger used by the Hammer class and its instances for logging output.
 	 */
 	private static final Logger logger = Logger.getLogger(Hammer.class);
 
@@ -75,15 +72,16 @@ public class Hammer {
 	};
 
 	/**
-	 * The array containing all the <tt>FakeUser</tt> that this Hammer handle,
-	 * representing all the virtual user that will connect to the XMPP server
-	 * and start MediaStream with its jitsi-videobridge
+	 * The array containing all the <tt>FakeUser</tt> that this TestHarness
+	 * handle, representing all the virtual user that will connect to the XMPP
+	 * server and start MediaStream with jitsi-videobridge
 	 */
 	private FakeUser fakeUsers[] = null;
 
 	/**
-	 * The <tt>HammerStats/tt> that will be used by this <tt>Hammer</tt> to keep
-	 * track of the streams' stats of all the <tt>FakeUser</tt> etc..
+	 * The
+	 * <tt>HammerStats/tt> that will be keep track of the streams' stats of all the <tt>FakeUser</tt>
+	 * etc..
 	 */
 	private HammerStats hammerStats;
 
@@ -119,13 +117,17 @@ public class Hammer {
 		fakeUsers = new FakeUser[numberOfUser];
 
 		for (int i = 0; i < fakeUsers.length; i++) {
+			// System.out.println("Creating fake user " + i);
 			fakeUsers[i] = new FakeUser(this.serverInfo, this.mediaDeviceChooser, this.nickname + "_" + i,
 					(hammerStats != null));
 		}
 
-		logger.info(String.format("Hammer created : %d fake users were created" + " with a base nickname %s",
-				numberOfUser, nickname));
-		System.out.println("Created Fake User: " + nickname);
+		//logger.info(String.format("Hammer created : %d fake users were created" + " with a base nickname %s",
+		//		numberOfUser, nickname));
+		// System.out.println(
+		 //		"Hammer created : " + numberOfUser + " fake users were created." + " with a base nickname" + nickname + "\n");
+		String str = "Created " + numberOfUser + " fake user with nickname " + nickname;
+		NetworkMonitor.GUILog.append(str);
 	}
 
 	/**
@@ -145,7 +147,7 @@ public class Hammer {
 				return;
 		}
 
-		logger.info("Start OSGi framework with the bundles : " + BUNDLES);
+		// logger.info("Start OSGi framework with the bundles : " + BUNDLES);
 		FrameworkFactory frameworkFactory = new FrameworkFactoryImpl();
 		Map<String, String> configuration = new HashMap<String, String>();
 		BundleContext bundleContext = null;
@@ -183,13 +185,13 @@ public class Hammer {
 			Hammer.framework = framework;
 		}
 
-		logger.info("Add extension provider for :");
+		//logger.info("Add extension provider for :");
 		ProviderManager manager = ProviderManager.getInstance();
-		logger.info("Element name : " + MediaProvider.ELEMENT_NAME + ", Namespace : " + MediaProvider.NAMESPACE);
+		//logger.info("Element name : " + MediaProvider.ELEMENT_NAME + ", Namespace : " + MediaProvider.NAMESPACE);
 		manager.addExtensionProvider(MediaProvider.ELEMENT_NAME, MediaProvider.NAMESPACE, new MediaProvider());
-		logger.info("Element name : " + SsrcProvider.ELEMENT_NAME + ", Namespace : " + SsrcProvider.NAMESPACE);
+		//logger.info("Element name : " + SsrcProvider.ELEMENT_NAME + ", Namespace : " + SsrcProvider.NAMESPACE);
 		manager.addExtensionProvider(SsrcProvider.ELEMENT_NAME, SsrcProvider.NAMESPACE, new SsrcProvider());
-		logger.info("Element name : " + JingleIQ.ELEMENT_NAME + ", Namespace : " + JingleIQ.NAMESPACE);
+		//logger.info("Element name : " + JingleIQ.ELEMENT_NAME + ", Namespace : " + JingleIQ.NAMESPACE);
 		manager.addIQProvider(JingleIQ.ELEMENT_NAME, JingleIQ.NAMESPACE, new JingleIQProvider());
 	}
 
@@ -236,7 +238,8 @@ public class Hammer {
 		else
 			startUsersAnonymous(wait);
 		this.started = true;
-		logger.info("The Hammer has correctly been started");
+		// System.out.println("Hammer started? " + started);
+		// logger.info("The Hammer has correctly been started");
 
 		if (!disableStats)
 			startStats(overallStats, allStats, summaryStats, statsPollingTime);
@@ -252,8 +255,9 @@ public class Hammer {
 	 *            the number of milliseconds the Hammer will wait during the
 	 *            start of two consecutive fake users.
 	 */
+	// this method is copied from Jitsi Hammer, not Test Harness version
 	private void startUsersWithCredentials(List<Credential> credentials, int wait) {
-		logger.info("Starting the Hammer : starting all FakeUsers " + "with username/password login");
+		// logger.info("Starting the Hammer : starting all FakeUsers " + "with username/password login");
 		try {
 			Iterator<FakeUser> userIt = Arrays.asList(fakeUsers).iterator();
 			Iterator<Credential> credIt = credentials.iterator();
@@ -286,7 +290,8 @@ public class Hammer {
 	 *            start of two consecutive fake users.
 	 */
 	private void startUsersAnonymous(int wait) {
-		//logger.info("Starting the Hammer : starting all " + "FakeUsers with anonymous login");
+		// logger.info("Starting the Hammer : starting all " + "FakeUsers with anonymous login");
+		// System.out.println("Starting all fake users in startUsersAnonymous()");
 		NetworkMonitor.GUILog.append("Starting the Hammer : FakeUsers with anonymous login\n");
 		try {
 			for (FakeUser user : fakeUsers) {
@@ -324,10 +329,11 @@ public class Hammer {
 	 *            <tt>HammerStats</tt> run method.
 	 */
 	private void startStats(boolean overallStats, boolean allStats, boolean summaryStats, int statsPollingTime) {
-		logger.info(String.format(
-				"Starting the HammerStats with " + "(overall stats : %s), "
-						+ "(summary stats : %s), (all stats : %s) and a polling of %dsec",
-				overallStats, summaryStats, allStats, statsPollingTime));
+//		logger.info(String.format(
+//				"Starting the HammerStats with " + "(overall stats : %s), "
+//						+ "(summary stats : %s), (all stats : %s) and a polling of %dsec",
+//				overallStats, summaryStats, allStats, statsPollingTime));
+		// System.out.println("Hammer startStats method!");
 		hammerStats.setOverallStatsLogging(overallStats);
 		hammerStats.setAllStatsLogging(allStats);
 		hammerStats.setSummaryStatsLogging(summaryStats);
@@ -350,6 +356,7 @@ public class Hammer {
 		for (FakeUser user : fakeUsers) {
 			user.stop();
 		}
+		// System.out.println("In Hammer.stop(): all user has been stopped!");
 
 		/*
 		 * Stop the thread of the HammerStats, without using the Thread instance
