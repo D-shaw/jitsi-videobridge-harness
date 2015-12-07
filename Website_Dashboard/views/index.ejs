@@ -76,7 +76,7 @@
                     <div class="intro-text">
                         <span class="name">Jitsi Test Tool</span>
                         <hr class="star-light">
-                        <span class="skills">Version-Alpha 1.0.0</span>
+                        <span class="skills">Version-Beta 1.0.0</span>
                     </div>
                 </div>
             </div>
@@ -143,34 +143,32 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="row">
-                                <div class="col-lg-5">
+                                <div class="col-lg-10">
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-hover table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th>cpu_usage</th>
-                                                    <th>used_memory</th>
-                                                    <th>rtp_loss</th>
-                                                    <th>audiochannels</th>
-                                                    <th>conferences</th>
-                                                    <th>participants</th>
-                                                    <th>current_timestamp</th>
-                                                    <th>total_memory</th>                         
-                                                    <th>videochannels</th>                         
+                                                   <th class="text-center">Number of Fake Users</th>
+                                                    <th class="text-center">Traffic Sent (MB)</th>
+                                                    <th class="text-center">Send Speed (Mbps)</th>
+                                                    <th class="text-center">Traffic Received (MB)</th>
+                                                    <th class="text-center">Receive Speed (MBps)</th>
+                                                    <th class="text-center">Audio Packet Loss</th>
+                                                    <th class="text-center">Video Packet Loss</th>
+                        
                                                    </tr>
                                             </thead>
                                             <tbody>
                                                 <% boardRows.forEach( function(boardRow) { %>
                                                     <tr>
-                                                        <td><%= boardRow.cpu_usage%></td>
-                                                        <td><%= boardRow.used_memory%></td>
-                                                        <td><%= boardRow.rtp_loss%></td>
-                                                        <td><%= boardRow.audiochannels%></td>
-                                                        <td><%= boardRow.conferences%></td>
-                                                        <td><%= boardRow.participants%></td>
-                                                        <td><%= boardRow.current_timestamp%></td>
-                                                        <td><%= boardRow.total_memory%></td>
-                                                        <td><%= boardRow.videochannels%></td>
+                                                        <td class="text-center"><%= boardRow.endpoints%></td>
+                                                        <td class="text-center"><%= boardRow.amountsentmb%></td>
+                                                        <td class="text-center"><%= boardRow.sendbitrate%></td>
+                                                        <td class="text-center"><%= boardRow.amountrevceivemb%></td>
+                                                        <td class="text-center"><%= boardRow.receivebitrate%></td>
+                                                        <td class="text-center"><%= boardRow.audiopackagelost%></td>
+                                                        <td class="text-center"><%= boardRow.vidwopackagelost%></td>
+
                                                     </tr>
                                                 <%});%>
                                             </tbody>
