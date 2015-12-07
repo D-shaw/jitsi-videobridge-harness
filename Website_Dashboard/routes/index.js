@@ -3,9 +3,8 @@ var router = express.Router();
 
 // for database
 var mongoose = require('mongoose');
-var db = require('../config/db');
-var JitsiDashboard = mongoose.model('JitsiDashboard');
 var rest = require('../config/rest');
+var JitsiDashboard = mongoose.model('JitsiDashboard');
 
 // // for render .html file.
 // var path = require("path");
