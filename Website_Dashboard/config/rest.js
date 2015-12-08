@@ -56,11 +56,11 @@ req.end();
 req.on('error', function(e) {
 	console.error("Fail To Get REST JSON");
 	console.error(e);
-	var stats1 = JSON.parse('{"cpu_usage":"0.03015", "used_memory":3732, "rtp_loss":"6", "audiochannels":0, "conferences":2, "participants":20, "current_timestamp":"2015-12-06 09:26:14.782", "total_memory":4051, "videochannels":20}');
-	var stats2 = JSON.parse('{"cpu_usage":"0.04213", "used_memory":4252, "rtp_loss":"22", "audiochannels":60, "conferences":2, "participants":60, "current_timestamp":"2015-12-06 09:26:14.782", "total_memory":4051, "videochannels":0}');
-	var stats3 = JSON.parse('{"cpu_usage":"0.02003", "used_memory":3288, "rtp_loss":"15", "audiochannels":20, "conferences":1, "participants":40, "current_timestamp":"2015-12-06 09:26:14.782", "total_memory":4051, "videochannels":20}');
-	var stats4 = JSON.parse('{"cpu_usage":"0.01088", "used_memory":1893, "rtp_loss":"8", "audiochannels":100, "conferences":3, "participants":100, "current_timestamp":"2015-12-06 09:26:14.782", "total_memory":4051, "videochannels":100}');
-	var stats5 = JSON.parse('{"cpu_usage":"0.50346", "used_memory":3846, "rtp_loss":"33", "audiochannels":50, "conferences":2, "participants":200, "current_timestamp":"2015-12-06 09:26:14.782", "total_memory":4051, "videochannels":150}');
+	var stats1 = JSON.parse('{"cpu_usage":"0.03015", "used_memory":3732, "rtp_loss":"6", "audiochannels":0, "conferences":2, "participants":20, "current_timestamp":"2015-12-06 09:26:14.782", "videochannels":20}');
+	var stats2 = JSON.parse('{"cpu_usage":"0.04213", "used_memory":4252, "rtp_loss":"22", "audiochannels":60, "conferences":2, "participants":60, "current_timestamp":"2015-12-06 09:26:14.782", "videochannels":0}');
+	var stats3 = JSON.parse('{"cpu_usage":"0.02003", "used_memory":3288, "rtp_loss":"15", "audiochannels":20, "conferences":1, "participants":40, "current_timestamp":"2015-12-06 09:26:14.782", "videochannels":20}');
+	var stats4 = JSON.parse('{"cpu_usage":"0.01088", "used_memory":1893, "rtp_loss":"8", "audiochannels":100, "conferences":3, "participants":100, "current_timestamp":"2015-12-06 09:26:14.782", "videochannels":100}');
+	var stats5 = JSON.parse('{"cpu_usage":"0.50346", "used_memory":3846, "rtp_loss":"33", "audiochannels":50, "conferences":2, "participants":200, "current_timestamp":"2015-12-06 09:26:14.782", "videochannels":150}');
 	var stats = [stats1, stats2, stats3, stats4, stats5];
 	for (var i = 0; i < 5; i++) {
 		JitsiDashboard.create(
@@ -72,7 +72,6 @@ req.on('error', function(e) {
 				conferences: stats[i].conferences,
 				participants: stats[i].participants,
 				current_timestamp: stats[i].current_timestamp,
-				total_memory: stats[i].total_memory,
 				videochannels: stats[i].videochannels
 			},
 			 function(err, createItem) {

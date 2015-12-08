@@ -148,27 +148,27 @@
                                         <table class="table table-bordered table-hover table-striped">
                                             <thead>
                                                 <tr>
-                                                   <th class="text-center">Number of Fake Users</th>
-                                                    <th class="text-center">Traffic Sent (MB)</th>
-                                                    <th class="text-center">Send Speed (Mbps)</th>
-                                                    <th class="text-center">Traffic Received (MB)</th>
-                                                    <th class="text-center">Receive Speed (MBps)</th>
-                                                    <th class="text-center">Audio Packet Loss</th>
-                                                    <th class="text-center">Video Packet Loss</th>
-                        
+                                                   <th class="text-center">CPU Usage</th>
+                                                    <th class="text-center">Memory Usage</th>
+                                                    <th class="text-center">Packet Lost</th>
+                                                    <th class="text-center">Audio Channels</th>
+                                                    <th class="text-center">Conferences</th>
+                                                    <th class="text-center">Fake Users</th>
+                                                    <th class="text-center">Current Time</th>
+                                                    <th class="text-center">Video Channels</th>
                                                    </tr>
                                             </thead>
                                             <tbody>
                                                 <% boardRows.forEach( function(boardRow) { %>
                                                     <tr>
-                                                        <td class="text-center"><%= boardRow.endpoints%></td>
-                                                        <td class="text-center"><%= boardRow.amountsentmb%></td>
-                                                        <td class="text-center"><%= boardRow.sendbitrate%></td>
-                                                        <td class="text-center"><%= boardRow.amountrevceivemb%></td>
-                                                        <td class="text-center"><%= boardRow.receivebitrate%></td>
-                                                        <td class="text-center"><%= boardRow.audiopackagelost%></td>
-                                                        <td class="text-center"><%= boardRow.vidwopackagelost%></td>
-
+                                                        <td class="text-center"><%= boardRow.cpu_usage%></td>
+                                                        <td class="text-center"><%= boardRow.used_memory%></td>
+                                                        <td class="text-center"><%= boardRow.rtp_loss%></td>
+                                                        <td class="text-center"><%= boardRow.audiochannels%></td>
+                                                        <td class="text-center"><%= boardRow.conferences%></td>
+                                                        <td class="text-center"><%= boardRow.participants%></td>
+                                                        <td class="text-center"><%= boardRow.current_timestamp%></td>
+                                                        <td class="text-center"><%= boardRow.videochannels%></td>
                                                     </tr>
                                                 <%});%>
                                             </tbody>
