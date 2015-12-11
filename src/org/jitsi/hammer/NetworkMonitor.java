@@ -58,14 +58,10 @@ import javax.swing.JCheckBox;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.awt.event.ItemEvent;
 import java.awt.Font;
@@ -96,8 +92,8 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 	private JRadioButton rdbtnUdp;
 
 	private JButton btnApply;
-	private JButton btnReset;
 	private JButton btnOutputLog;
+	private JButton btnReset;
 	private JButton btnAssist;
 	private JButton btnServerMonitor;
 	private JButton AudioFileButton;
@@ -116,10 +112,12 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 	private JCheckBox chckbxNoStats;
 	private JScrollPane scrollPane;
 	public JTextArea txtrReserved;
-	
-	private JPanel GenPanel = new JPanel();
 
+	private JPanel GenPanel = new JPanel();
+	
 	public static int numberOfFakeUsers;
+
+	private LocalStats localStats = new LocalStats();
 
 	/**
 	 * Launch the application.
@@ -166,7 +164,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 					NetworkMonitor window = new NetworkMonitor();
 					window.frmTestHarness.setVisible(true);
 				} catch (Exception e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 				}
 			}
 		});
@@ -318,7 +316,6 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		frmTestHarness.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
-		
 		tabbedPane.addTab("General", null, GenPanel, null);
 		GridBagLayout gbl_GenPanel = new GridBagLayout();
 		gbl_GenPanel.columnWidths = new int[] { 50, 160, 70, 160, 50, 0 };
@@ -566,7 +563,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 		gbc_lblAddingUserInterval.gridy = 9;
 		AdvPanel.add(lblAddingUserInterval, gbc_lblAddingUserInterval);
 
-		SpinnerModel smIV = new SpinnerNumberModel(0,0, null, 100);
+		SpinnerModel smIV = new SpinnerNumberModel(0, 0, null, 100);
 		spnAddInterval = new JSpinner(smIV);
 		GridBagConstraints gbc_spnAddInterval = new GridBagConstraints();
 		gbc_spnAddInterval.ipadx = 30;
@@ -630,33 +627,24 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			}
 		}
 	}
-	// String timeStampStart = new
-	// SimpleDateFormat("MM/dd/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime());
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 
 		if (source == btnApply) {
+			txtrReserved.setText("");
 			// We call initialize the Hammer framework
 			Hammer.init();
-			String timeStampStart = new SimpleDateFormat("MM/dd/yyyy_HH:mm:ss")
-					.format(Calendar.getInstance().getTime());
+
 			String XMPPdomain = txtXMPPdomain.getText();
 			String XMPPhost = txtXMPPhost.getText();
 			String MUCdomain = txtMUCdomain.getText();
 			String roomName = txtRoomName.getText();
 			int port = Integer.parseInt(txtPort.getText());
-<<<<<<< HEAD
-			numberOfFakeUsers = (Integer) spnFakeUsers.getValue();
-			System.out.println("network monitor " + numberOfFakeUsers);
-			// how long does the fake conference run in seconds. if 0 or
-			// negative, never stops.
-=======
 			int numberOfFakeUsers = (Integer) spnFakeUsers.getValue();
 			// how long does the fake conference run in seconds.
 			// Should to be positive number
->>>>>>> d1ad2a7f14777e0e2276f3660b9675c7b4e5009b
 			int length = Integer.parseInt(txtLength.getText());
 
 			HostInfo hostInfo = new HostInfo(XMPPdomain, XMPPhost, port, MUCdomain, roomName);
@@ -726,8 +714,7 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 			/*
 			 * Construct Hammer
 			 */
-			Hammer hammer = new Hammer(hostInfo, mdc, "BU-Testers", numberOfFakeUsers);
-			// System.out.println(mdc.toString());
+			Hammer hammer = new Hammer(hostInfo, mdc, "BU-Testers", numberOfFakeUsers, localStats);			// System.out.println(mdc.toString());
 			txtrReserved.append("Start Testing...\n");
 
 			// Cleanly stop the hammer when the program shutdown
@@ -739,72 +726,33 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 				}
 			}));
 
-			// After the initialization we start the Hammer (all its users will
-			// connect to the XMPP server and try to setup media stream with it
-			// bridge
-			hammer.start(interval, disableStats, null, overallStats, allStats, summaryStats, statsPolling);
-//			System.out.println("After Hammer start:  " + txtRoomName.getText());
-			txtrReserved.append("\n" + GUILog.toString());
-
 			// open browser
 			StringBuffer roomUrl = new StringBuffer("http://");
 			roomUrl.append(XMPPhost).append("/").append(roomName);
 			openWebpage(roomUrl.toString());
 
-			// Set the fake conference to stop depending on runLength
-<<<<<<< HEAD
-			/*
-			 * This part not working now, just comment if (length > 0) {
-			 * 
-			 * try { Thread.sleep(length * 1000); } catch (InterruptedException
-			 * e1) { // TODO Auto-generated catch block e1.printStackTrace(); }
-			 * hammer.stop();
-			 * 
-			 * } else { while (true) try { Thread.sleep(3600000); } catch
-			 * (InterruptedException e1) { // TODO Auto-generated catch block
-			 * e1.printStackTrace(); } }
-			 */
+			// After the initialization we start the Hammer (all its users will
+			// connect to the XMPP server and try to setup media stream with it
+			// bridge
+			hammer.start(interval, disableStats, null, overallStats, allStats, summaryStats, statsPolling);
+			// System.out.println("After Hammer start: " +
+			// txtRoomName.getText());
+			txtrReserved.append("\n" + GUILog.toString());
 
-			if (length > 0) {
-				try {
-					Thread.sleep(length * 1000);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
-				} finally {
-					hammer.stop();
-					txtrReserved.append("Test Stop");
-=======
+			// Set the fake conference to stop depending on runLength
 			// if (length > 0) {
 			new Timer().schedule(new TimerTask() {
-				
+
 				public void run() {
 					hammer.stop();
 					txtrReserved.append("Test Stop");
-//					System.out.println("After Hammer stop:  " + txtRoomName.getText());
->>>>>>> d1ad2a7f14777e0e2276f3660b9675c7b4e5009b
-
+					System.out.println("Time runs out, Hammer stop: ");
 				}
 			}, length * 1000);
 
-				
 			// }
 
 		} // end of btnApply
-
-		if (source == btnOutputLog) {
-			CreateStatFile.main(null);
-			// String timeStamp = new
-			// SimpleDateFormat("MM/dd/yyyy_HH:mm:ss").format(Calendar.getInstance().getTime());
-			// java.awt.Desktop.getDesktop().edit(new
-			// File("/Users/Ritika/Desktop/JITSI Test Harness Log"));
-			txtrReserved.append("Creating new log at ");
-			// txtrReserved.append(timeStamp);
-			txtrReserved.append("\n");
-			txtrReserved.append("Room created at ");
-			// txtrReserved.append(timeStampStart);
-
-		}
 
 		else if (source == AudioFileButton) {
 			JFileChooser chooser = new JFileChooser();
@@ -863,33 +811,34 @@ public class NetworkMonitor implements ItemListener, ActionListener, FocusListen
 				try {
 					desktop.browse(url.toURI());
 				} catch (IOException | URISyntaxException e1) {
-<<<<<<< HEAD
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
-=======
 					e1.printStackTrace();
->>>>>>> d1ad2a7f14777e0e2276f3660b9675c7b4e5009b
 				}
 			} else {
 				Runtime runtime = Runtime.getRuntime();
 				try {
 					runtime.exec("open " + url);
 				} catch (IOException e1) {
-<<<<<<< HEAD
-					// TODO Auto-generated catch block
-					//e1.printStackTrace();
-				}
-			}
-		} catch (MalformedURLException e2) {
-			// TODO Auto-generated catch block
-			//e2.printStackTrace();
-=======
 					e1.printStackTrace();
 				}
 			}
 		} catch (MalformedURLException e2) {
 			e2.printStackTrace();
->>>>>>> d1ad2a7f14777e0e2276f3660b9675c7b4e5009b
+		}
+	}
+	
+	public class LocalStats {
+		public void createFakeUser() {
+			txtrReserved.append("\nOne Fake User Created.");
+		}
+	}
+	
+	public class LocalStatsRunnable implements Runnable {
+		@Override
+		public void run() {
+			txtrReserved.setText("");
+			// We call initialize the Hammer framework
+			// txtrReserved.append("ARE YOU RUNNING CORRECTLY??");
+
 		}
 	}
 }

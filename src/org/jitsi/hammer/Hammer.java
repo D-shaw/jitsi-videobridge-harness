@@ -110,11 +110,16 @@ public class Hammer {
 	 *            The number of virtual users this <tt>Hammer</tt> will create
 	 *            and handle.
 	 */
-	public Hammer(HostInfo host, MediaDeviceChooser mdc, String nickname, int numberOfUser) {
+
+	private NetworkMonitor.LocalStats localStats;
+
+	public Hammer(HostInfo host, MediaDeviceChooser mdc, String nickname, int numberOfUser,
+			NetworkMonitor.LocalStats localStats) {
 		this.nickname = nickname;
 		this.serverInfo = host;
 		this.mediaDeviceChooser = mdc;
 		fakeUsers = new FakeUser[numberOfUser];
+		this.localStats = localStats;
 
 		for (int i = 0; i < fakeUsers.length; i++) {
 			// System.out.println("Creating fake user " + i);
@@ -122,10 +127,12 @@ public class Hammer {
 					(hammerStats != null));
 		}
 
-		//logger.info(String.format("Hammer created : %d fake users were created" + " with a base nickname %s",
-		//		numberOfUser, nickname));
+		logger.info(String.format("Hammer created : %d fake users were created" + " with a base nickname %s",
+				numberOfUser, nickname));
+
 		// System.out.println(
-		 //		"Hammer created : " + numberOfUser + " fake users were created." + " with a base nickname" + nickname + "\n");
+		// "Hammer created : " + numberOfUser + " fake users were created." + "
+		// with a base nickname" + nickname + "\n");
 		String str = "Created " + numberOfUser + " fake user with nickname " + nickname;
 		NetworkMonitor.GUILog.append(str);
 	}
@@ -185,13 +192,16 @@ public class Hammer {
 			Hammer.framework = framework;
 		}
 
-		//logger.info("Add extension provider for :");
+		// logger.info("Add extension provider for :");
 		ProviderManager manager = ProviderManager.getInstance();
-		//logger.info("Element name : " + MediaProvider.ELEMENT_NAME + ", Namespace : " + MediaProvider.NAMESPACE);
+		// logger.info("Element name : " + MediaProvider.ELEMENT_NAME + ",
+		// Namespace : " + MediaProvider.NAMESPACE);
 		manager.addExtensionProvider(MediaProvider.ELEMENT_NAME, MediaProvider.NAMESPACE, new MediaProvider());
-		//logger.info("Element name : " + SsrcProvider.ELEMENT_NAME + ", Namespace : " + SsrcProvider.NAMESPACE);
+		// logger.info("Element name : " + SsrcProvider.ELEMENT_NAME + ",
+		// Namespace : " + SsrcProvider.NAMESPACE);
 		manager.addExtensionProvider(SsrcProvider.ELEMENT_NAME, SsrcProvider.NAMESPACE, new SsrcProvider());
-		//logger.info("Element name : " + JingleIQ.ELEMENT_NAME + ", Namespace : " + JingleIQ.NAMESPACE);
+		// logger.info("Element name : " + JingleIQ.ELEMENT_NAME + ", Namespace
+		// : " + JingleIQ.NAMESPACE);
 		manager.addIQProvider(JingleIQ.ELEMENT_NAME, JingleIQ.NAMESPACE, new JingleIQProvider());
 	}
 
@@ -257,7 +267,8 @@ public class Hammer {
 	 */
 	// this method is copied from Jitsi Hammer, not Test Harness version
 	private void startUsersWithCredentials(List<Credential> credentials, int wait) {
-		// logger.info("Starting the Hammer : starting all FakeUsers " + "with username/password login");
+		// logger.info("Starting the Hammer : starting all FakeUsers " + "with
+		// username/password login");
 		try {
 			Iterator<FakeUser> userIt = Arrays.asList(fakeUsers).iterator();
 			Iterator<Credential> credIt = credentials.iterator();
@@ -290,13 +301,17 @@ public class Hammer {
 	 *            start of two consecutive fake users.
 	 */
 	private void startUsersAnonymous(int wait) {
-		// logger.info("Starting the Hammer : starting all " + "FakeUsers with anonymous login");
-		// System.out.println("Starting all fake users in startUsersAnonymous()");
+		// logger.info("Starting the Hammer : starting all " + "FakeUsers with
+		// anonymous login");
+		// System.out.println("Starting all fake users in
+		// startUsersAnonymous()");
 		NetworkMonitor.GUILog.append("Starting the Hammer : FakeUsers with anonymous login\n");
 		try {
 			for (FakeUser user : fakeUsers) {
 				FakeUserStats userStats;
+				notifyLocalStats();
 				user.start();
+
 				if (hammerStats != null && (userStats = user.getFakeUserStats()) != null)
 					hammerStats.addFakeUsersStats(userStats);
 				Thread.sleep(wait);
@@ -329,10 +344,10 @@ public class Hammer {
 	 *            <tt>HammerStats</tt> run method.
 	 */
 	private void startStats(boolean overallStats, boolean allStats, boolean summaryStats, int statsPollingTime) {
-//		logger.info(String.format(
-//				"Starting the HammerStats with " + "(overall stats : %s), "
-//						+ "(summary stats : %s), (all stats : %s) and a polling of %dsec",
-//				overallStats, summaryStats, allStats, statsPollingTime));
+		// logger.info(String.format(
+		// "Starting the HammerStats with " + "(overall stats : %s), "
+		// + "(summary stats : %s), (all stats : %s) and a polling of %dsec",
+		// overallStats, summaryStats, allStats, statsPollingTime));
 		// System.out.println("Hammer startStats method!");
 		hammerStats.setOverallStatsLogging(overallStats);
 		hammerStats.setAllStatsLogging(allStats);
@@ -374,5 +389,9 @@ public class Hammer {
 
 		this.started = false;
 		logger.info("The Hammer has been correctly stopped");
+	}
+
+	public void notifyLocalStats() {
+		localStats.createFakeUser();
 	}
 }
